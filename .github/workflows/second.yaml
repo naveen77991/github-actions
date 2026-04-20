@@ -1,0 +1,16 @@
+name: Second Workflow
+
+on: push
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4   # 👈 brings your code
+
+      - name: Show files
+        run: ls
+
+      - name: Print message
+        run: echo "Code loaded successfully"
