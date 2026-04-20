@@ -1,1 +1,42 @@
 
+name: Build and Push to ECR
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest   # GitHub managed runner
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # ✅ Use YOUR secret names
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_KEY }}
+          aws-region: ${{ secrets.REGION }}
+
+      # ✅ Login to ECR
+      - name: Login to ECR
+        uses: aws-actions/amazon-ecr-login@v2
+
+      # ✅ Build Docker Image
+      - name: Build Docker Image
+        run: docker build -t catalogue ./app
+
+      # ✅ Tag Image
+      - name: Tag Docker Image
+        run: |
+          docker tag catalogue:latest \
+          ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.REGION }}.amazonaws.com/catalogue:latest
+
+      # ✅ Push Image
+      - name: Push Docker Image
+        run: |
+          docker push \
+          ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.REGION }}.amazonaws.com/catalogue:latest
